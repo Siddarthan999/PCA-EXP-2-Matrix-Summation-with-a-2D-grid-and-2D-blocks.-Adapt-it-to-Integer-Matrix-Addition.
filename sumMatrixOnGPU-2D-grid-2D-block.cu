@@ -1,3 +1,57 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <cuda_runtime.h>
+
+__global__ void sumMatrixOnGPU2D(int *MatA, int *MatB, int *MatC, int nx, int ny)
+{
+    int ix = blockIdx.x * blockDim.x + threadIdx.x;
+    int iy = blockIdx.y * blockDim.y + threadIdx.y;
+    int idx = iy * nx + ix;
+
+    if (ix < nx && iy < ny) {
+        MatC[idx] = MatA[idx] + MatB[idx];
+    }
+}
+
+void sumMatrixOnHost(int *MatA, int *MatB, int *MatC, int nx, int ny)
+{
+    for (int iy = 0; iy < ny; iy++) {
+        for (int ix = 0; ix < nx; ix++) {
+            int idx = iy * nx + ix;
+            MatC[idx] = MatA[idx] + MatB[idx];
+        }
+    }
+}
+
+void initialData(int *ip, int size)
+{
+    time_t t;
+    srand((unsigned int)time(&t));
+
+    for (int i = 0; i < size; i++) {
+        ip[i] = (int)(rand() & 0xFF);
+    }
+}
+
+void checkResult(int *hostRef, int *gpuRef, const int N)
+{
+    double epsilon = 1.0E-8;
+    bool match = 1;
+
+    for (int i = 0; i < N; i++) {
+        if (abs(hostRef[i] - gpuRef[i]) > epsilon) {
+            match = 0;
+            printf("Arrays do not match!\n");
+            printf("host %d gpu %d at current %d\n", hostRef[i], gpuRef[i], i);
+            break;
+        }
+    }
+
+    if (match) printf("Arrays match.\n");
+
+    return;
+}
 int main(int argc, char **argv) {
 printf("%s Starting...\n", argv[0]);
 // set up device
