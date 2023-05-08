@@ -138,9 +138,11 @@ sumMatrixOnGPU-2D-grid-2D-block.cu:
 ## Output:
     $ nvcc -arch=sm_20 sumMatrixOnGPU-2D-grid-2D-block.cu -o matrix2D
     $ ./matrix2D
+    
     sumMatrixOnGPU2D <<<(512,512), (32,32)>>> elapsed 0.060323 sec
 
     * Next, alter the block dimensions to 32 x 16 and recompile and rerun. The kernel becomes nearly two times faster:
+    
     sumMatrixOnGPU2D <<<(512,1024), (32,16)>>> elapsed 0.038041 sec
 
     * You may wonder why the kernel performance nearly doubled just by altering the execution configuration. Intuitively, you may reason that the second configuration has twice as many blocks as
