@@ -2,14 +2,14 @@
 ## Aim:
 To perform Matrix Summation with a 2D grid and 2D blocks. And adapt it to Integer Matrix Addition.
 ## Procedure:
-* Define the size of the matrix by setting the values of nx and ny, and calculate the total number of elements, nxy.
-* Allocate memory on both the host and device for the input and output matrices using the appropriate data types.
-* Initialize the input matrices with data on the host side and transfer them to the device memory using the cudaMemcpy function.
-* Define the block and grid dimensions for the kernel. The block dimensions should be a 2D array with each element representing the number of threads in each dimension. The grid dimensions should be calculated using the formula (ceil(nx/block.x), ceil(ny/block.y)).
-* Launch the kernel with the input and output matrices as arguments using the <<<grid, block>>> notation. Wait for the kernel to finish executing using the cudaDeviceSynchronize function.
-* Transfer the output matrix from device to host memory using the cudaMemcpy function.
-* Check the correctness of the output matrix by comparing it to the expected result on the host side.
-* Free the memory on both the host and device using the appropriate functions. Reset the device using the cudaDeviceReset function.
+1. Include the required files and library.
+2. Declare a function sumMatrixOnHost , to perform matrix summation on the host side . Declare three matrix A , B , C . Store the resultant matrix in C.
+3. Declare a function with __ global __ , which is a CUDA C keyword , to execute the function to perform matrix summation on GPU .
+4. Declare Main method/function .
+5. In the Main function Set up device and data size of matrix ,Allocate Host Memory and device global memory, Initialize data at host side and then add matrix at host side ,transfer data from host to device.
+6. Invoke kernel at host side , check for kernel error and copy kernel result back to host side.
+7. Finally Free device global memory, host memory and reset device.
+8. Save and Run the Program.
 ## Program:
 sumMatrixOnGPU-2D-grid-2D-block.cu:
 ```
@@ -17,27 +17,17 @@ sumMatrixOnGPU-2D-grid-2D-block.cu:
 #include <cuda_runtime.h>
 #include <stdio.h>
 
-/*
- * This example demonstrates a simple vector sum on the GPU and on the host.
- * sumArraysOnGPU splits the work of the vector sum across CUDA threads on the
- * GPU. A 2D thread block and 2D grid are used. sumArraysOnHost sequentially
- * iterates through vector elements on the host.
- */
-
 void initialData(int *ip, const int size)
 {
     int i;
-
     for(i = 0; i < size; i++)
     {
         ip[i] = (int)(rand() & 0xFF) / 10.0f;
     }
-
     return;
 }
 
-void sumMatrixOnHost(int *A, int *B, int *C, const int nx,
-                     const int ny)
+void sumMatrixOnHost(int *A, int *B, int *C, const int nx,const int ny)
 {
     int *ia = A;
     int *ib = B;
@@ -80,10 +70,8 @@ void checkResult(int *hostRef, int *gpuRef, const int N)
     else
         printf("Arrays do not match.\n\n");
 }
-
 // grid 2D block 2D
-__global__ void sumMatrixOnGPU2D(int *MatA, int *MatB, int *MatC, int nx,
-                                 int ny)
+__global__ void sumMatrixOnGPU2D(int *MatA, int *MatB, int *MatC, int nx,int ny)
 {
     unsigned int ix = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int iy = threadIdx.y + blockIdx.y * blockDim.y;
@@ -184,27 +172,11 @@ int main(int argc, char **argv)
     return (0);
 }
 ```
-## Output:
-```
-root@SAV-MLSystem:/home/student/Sidd_Lab_Exp_2# nvcc sumMatrixOnGPU-2D-grid-2D-block.cu -o sumMatrixOnGPU-2D-grid-2D-block
-root@SAV-MLSystem:/home/student/Sidd_Lab_Exp_2# nvcc sumMatrixOnGPU-2D-grid-2D-block.cu
-root@SAV-MLSystem:/home/student/Sidd_Lab_Exp_2# ./sumMatrixOnGPU-2D-grid-2D-block
-./sumMatrixOnGPU-2D-grid-2D-block Starting...
-Using Device 0: NVIDIA GeForce GT 710
-Matrix size: nx 16384 ny 16384
-Matrix initialization elapsed 6.922423 sec
-sumMatrixOnHost elapsed 0.566353 sec
-Error: sumMatrixOnGPU-2D-grid-2D-block.cu:126, code: 2, reason: out of memory
-root@SAV-MLSystem:/home/student/Sidd_Lab_Exp_2#
-```
- ![image](https://user-images.githubusercontent.com/91734840/236863397-4f3e46b2-a519-4c3e-885b-6cdff46f485f.png)
-
-# EXPLANATION:
-* The output of the program sumMatrixOnGPU-2D-grid-2D-block has started running and it is using the NVIDIA GeForce GT 710 device for CUDA processing. The program is designed to perform matrix summation using 2D grid and 2D blocks in CUDA programming.
-* The size of the matrix is nx 16384 ny 16384, which means the matrix has 16384 rows and 16384 columns. The matrix initialization process has elapsed for 6.922423 seconds.
-* The program has also executed sumMatrixOnHost to calculate the sum of the matrix on the host, and it has taken 0.566353 seconds to execute.
-* However, an error occurred at line 126 with an error code of 2, and the reason for the error is that the program has run out of memory. This indicates that there is not enough memory available on the GPU to execute the program and perform the matrix addition operation.
-* Therefore, the program failed to execute and terminated without producing the desired result.
+## Ouput:
+![image](https://github.com/Siddarthan999/PCA-EXP-2-Matrix-Summation-with-a-2D-grid-and-2D-blocks.-Adapt-it-to-Integer-Matrix-Addition./assets/91734840/5ce7bbe4-6d26-4401-bb17-fe417672d028)
+Matrix initialization : 6.338138 sec.
+Sum matrix on Host : 0.884061 sec.
+Sum matrix on GPU2D : 0.012146 sec
 
 ## Result:
-Thus, the Matrix Summation with a 2D grid and 2D blocks. And adapt it to Integer Matrix Addition has been successfully performed.
+The host took 0.884061 seconds to complete it’s computation, while the GPU outperforms the host and completes the computation in 0.012146 seconds. Therefore, float variables in the GPU will result in the best possible result. Thus, matrix summation using 2D grids and 2D blocks has been performed successfully.
